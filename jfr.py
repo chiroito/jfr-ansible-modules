@@ -5,7 +5,6 @@ DOCUMENTATION = '''
 EXAMPLES = '''
 '''
 
-
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -48,10 +47,8 @@ def main():
 
     param_str = " ".join(param)
     (rc, out, err) = module.run_command('%s %s JFR.%s %s' % (jcmd_path, pid, cmd, param_str), check_rc=True)
-    print out
-    print err
-    module.exit_json(changed=True, rc=rc, stdout=out, stderr=err)
 
+    module.exit_json(changed=True, rc=rc, stdout=out, stderr=err)
 
 from ansible.module_utils.basic import *
 
