@@ -1,9 +1,96 @@
 #!/usr/bin/python
 
 DOCUMENTATION = '''
+---
+module: jfr
+short_description: Control Java Flight Recorder on OracleJDK
+description:
+     - This module controls Java Flight Recorder on OracleJDK using jcmd command.
+     - Parameter details see https://docs.oracle.com/javacomponents/jmc-5-5/jfr-runtime-guide/comline.htm
+version_added: "2.1"
+options:
+  pid:
+    description:
+      - "PID of OracleJDK process."
+    required: true
+  cmd:
+    description:
+        - "Operation to Java Flight Recorder."
+    required: true
+    choices: [ "start", "stop", "check", "dump" ]
+  name:
+    description:
+      - "Name of recording"
+    required: false
+  settings:
+    description:
+      - "Server-side template"
+    required: false
+  defaultrecording:
+    description:
+      - "Starts default recording"
+    required: false
+  delay:
+    description:
+      - "Delay start of recording"
+    required: false
+  duration:
+    description:
+      - "Duration of recording"
+    required: false
+  filename:
+    description:
+      - "Resulting recording filename"
+    required: false
+  compress:
+    description:
+      - "GZip compress the resulting recording file"
+    required: false
+  maxage:
+    description:
+      - "Maximum age of buffer data"
+    required: false
+  maxsize:
+    description:
+      - "Maximum size of buffers in bytes"
+    required: false
+  recording:
+    description:
+      - "Recording id"
+    required: false
+  verbose:
+    description:
+      - "Print verbose data"
+    required: false
+  discard:
+    description:
+      - "Discards the recording data"
+    required: false
+  copy_to_file:
+    description:
+      - "Copy recording data to file"
+    required: false
+  compress_copy:
+    description:
+      - "GZip compress copy_to_file destination"
+    required: false
+author:
+    - Chihiro Ito
+requirements:
+   - jcmd (command line binary)
+notes:
+   - see also https://docs.oracle.com/javacomponents/jmc-5-5/jfr-runtime-guide/comline.htm
 '''
 
 EXAMPLES = '''
+# Start Java Flight Recorder on OracleJDK that PID is 1234.
+- jfr: pid=1234 cmd=start
+
+# Stop recording 1 of Java Flight Recorder on OracleJDK that PID is 1234.
+- jfr: pid=1234 cmd=stop recording=1
+
+# Dump Java Flight Recorder (recording id=1) to ~/dump.jfr file.
+- jfr: pid=1234 cmd=dump recording=1 copy_to_file=~/dump.jfr
 '''
 
 
@@ -62,5 +149,5 @@ def main():
 from ansible.module_utils.basic import *
 
 
-if __name__ == '__main__'
+if __name__ == '__main__':
     main()
