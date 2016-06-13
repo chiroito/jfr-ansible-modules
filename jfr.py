@@ -124,7 +124,7 @@ def main():
         stop={'name', 'recording', 'verbose'},
         check={'name', 'recording', 'discard',
                'copy_to_file', 'compress_copy'},
-        dump={'name', 'recording', 'copy_to_file', 'compress_copy'}
+        dump={'name', 'recording', 'copy_to_file', 'compress_copy', 'filename'}
     )
 
     pid = module.params['pid']
