@@ -130,8 +130,6 @@ def main():
     pid = module.params['pid']
     cmd = module.params['cmd']
 
-    jcmd_path = module.get_bin_path('jcmd', required=True)
-
     param = []
     for _param in jfr_option[cmd]:
         if module.params[_param] is not None:
@@ -139,12 +137,65 @@ def main():
 
     param_str = ' '.join(param)
 
-    (rc, out, err) = module.run_command(
-        '%s %s JFR.%s %s' % (jcmd_path, pid, cmd, param_str),
-        check_rc=True
-    )
+    try:
+        jcmd_path = module.get_bin_path('jcmd', required=True)
+        (rc, out, err) = module.run_command(
+            '%s %s JFR.%s %s' % (jcmd_path, pid, cmd, param_str)
+        )
+        if rc == 0:
+            changed = True
+            if cmd == 'check':
+                changed = False
+                is_success = is_check_success(out)
+            elif cmd == 'start':
+                is_success = is_start_success(out)
+            elif cmd == 'stop':
+                is_success = is_stop_success(out)
+            else:
+                is_success = is_dump_success(out)
 
-    module.exit_json(changed=True, rc=rc, stdout=out, stderr=err)
+            if is_success:
+                module.exit_json(changed=changed, rc=rc,
+                                 stdout=out, stderr=err)
+            else:
+                module.fail_json(
+                    msg="Failed to execute jcmd using input parameters : %s" % (format_msg(out)))
+        else:
+            module.fail_json(
+                msg="Failed to execute jcmd using input parameters : %s" % (format_msg(err)))
+    except Exception, e:
+        module.fail_json(msg="Failed to execute jcmd : %s" %
+                         (format_msg(e.message)))
+
+
+def format_msg(msg):
+    return msg.replace("\n", "").replace("\"", "'").replace("\t", "  ")
+
+
+def is_check_success(stdout):
+    match = re.match("[0-9]+:\nCould not.+", stdout)
+    if match:
+        return False
+    return True
+
+
+def is_start_success(stdout):
+    if re.match("[0-9]+:\nCould not start recording.+", stdout):
+        return False
+    return True
+
+
+def is_stop_success(stdout):
+    if re.match("[0-9]+:\nCould not find recording.+", stdout):
+        return False
+    return True
+
+
+def is_dump_success(stdout):
+    if re.match("[0-9]+:\nCould not find recording.+", stdout):
+        return False
+    return True
+
 
 from ansible.module_utils.basic import *
 
